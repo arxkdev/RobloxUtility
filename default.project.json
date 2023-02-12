@@ -1,0 +1,26 @@
+{
+  "name": "RobloxUtility",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "lib": {
+        "$path": "lib"
+      }
+    },
+
+    "ServerScriptService": {
+      "ServerExamples": {
+        "$path": "testing/serverExamples"
+      }
+    },
+
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "ClientExamples": {
+          "$path": "testing/clientExamples"
+        }
+      }
+    }
+  }
+}
