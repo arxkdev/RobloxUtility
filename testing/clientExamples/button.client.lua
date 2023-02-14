@@ -17,6 +17,7 @@ for _, v in MainUI.Buttons:GetChildren() do
     end)
         :AddHoverAnimation("ROTATE")
         :AddHoverAnimation("UP_SCALE")
+        :AddHoverAnimation("DARKEN")
         :AddHoldAnimation("DOWN_SCALE")
         :AddClickAnimation("RIPPLE")
         :SetSound("UI_CLICK", "Click", "rbxassetid://6042053626");

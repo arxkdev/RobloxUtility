@@ -1,6 +1,6 @@
 -- Imports
 local Players = game:GetService("Players")
-local SoundService = game:GetService("SoundService")
+local SoundService = game:GetService("SoundService");
 local TweenService = game:GetService("TweenService");
 local Signal = require(script.Signal);
 
@@ -8,14 +8,14 @@ local Button = {};
 Button.__index = Button;
 
 -- Types
+type Button = typeof(Button.new(nil, nil));
 type Animation = {
     Name: string,
-    OnHoverBegin: (btn: typeof(Button.new), props: { any }) -> ()?,
-    OnHoverEnded: (btn: typeof(Button.new), props: { any }) -> ()?,
-    OnHoldBegin: (btn: typeof(Button.new), props: { any }) -> ()?,
-    OnHoldEnded: (btn: typeof(Button.new), props: { any }) -> ()?,
+    OnHoverBegin: (btn: Button, props: { any }) -> ({any?})?,
+    OnHoverEnded: (btn: Button, cachedArguments: {any?}) -> ()?,
+    OnHoldBegin: (btn: Button, props: { any }) -> ({any?})?,
+    OnHoldEnded: (btn: Button, cachedArguments: {any?}) -> ()?,
 };
-type Button = typeof(Button.new(nil, nil));
 
 -- Constants
 local PLAYER = Players.LocalPlayer;
@@ -130,11 +130,58 @@ local ANIMATIONS: Animation = {
                 RippleClone:Destroy();
             end;
         end,
-    }
+    },
+    {
+        Name = "DARKEN",
+        AnimationStart = function(btn, props)
+            local instance = btn.Instance;
+            local colorBefore = if instance:IsA("ImageButton") then instance.ImageColor3 else instance.BackgroundColor3;
+
+            local function DarkenColor(color)
+                local black = Color3.new(0, 0, 0);
+                local amount = 0.1;
+                local darkColor = color:Lerp(black, amount);
+                return darkColor;
+            end;
+
+            local newDarkenedColor = if instance:IsA("ImageButton") then DarkenColor(instance.ImageColor3) else DarkenColor(instance.BackgroundColor3);
+
+            local properties;
+            if (instance:IsA("ImageButton")) then
+                properties = {
+                    ImageColor3 = newDarkenedColor;
+                };
+            else
+                properties = {
+                    BackgroundColor3 = newDarkenedColor;
+                };
+            end;
+
+            TweenService:Create(instance, TweenInfo.new(0.25, Enum.EasingStyle.Quint), properties):Play();
+            return {colorBefore}; -- Return the original color so we can use it later
+        end,
+        AnimationStop = function(btn, cachedArguments)
+            local instance = btn.Instance;
+            local originalColor = cachedArguments[1];
+
+            local properties;
+            if (instance:IsA("ImageButton")) then
+                properties = {
+                    ImageColor3 = originalColor;
+                };
+            else
+                properties = {
+                    BackgroundColor3 = originalColor;
+                };
+            end;
+
+            TweenService:Create(instance, TweenInfo.new(0.25, Enum.EasingStyle.Quint), properties):Play();
+        end,
+    },
 };
 
 -- Helper Functions
-function GetAnimation(typeOfAnimation: string): Animation | nil
+function GetAnimation(typeOfAnimation: string): Animation?
     for _, animation in ANIMATIONS do
         if (animation.Name == typeOfAnimation) then
             return animation;
@@ -164,6 +211,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
         SoundInstance = nil
     };
     self.Instance = buttonObject;
+    -- self.Instance:SetAttribute("OriginalColor", if self.Instance:IsA("ImageButton") then self.Instance.ImageColor3 else self.Instance.BackgroundColor3);
 
     -- Hookup the callback to the button's (activated) event.
     table.insert(self.Connections, buttonObject.Activated:Connect(activatedCallback));
@@ -211,11 +259,13 @@ end
 function Button:AddHoverAnimation(typeOfAnimation: string): Button
     local animation = GetAnimation(typeOfAnimation);
 
+    -- Save the arguments for the animation so we can use it later.
+    local cachedArguments: any;
     self.HoverBegin:Connect(function()
-        animation.AnimationStart(self);
+        cachedArguments = animation.AnimationStart(self);
     end);
     self.HoverEnded:Connect(function()
-        animation.AnimationStop(self);
+        animation.AnimationStop(self, cachedArguments);
     end);
 
     return self;
@@ -225,11 +275,12 @@ end
 function Button:AddHoldAnimation(typeOfAnimation: string): Button
     local animation = GetAnimation(typeOfAnimation);
 
+    local cachedArguments: any;
     self.HoldBegin:Connect(function()
-        animation.AnimationStart(self);
+        cachedArguments = animation.AnimationStart(self);
     end);
     self.HoldEnded:Connect(function()
-        animation.AnimationStop(self);
+        animation.AnimationStop(self, cachedArguments);
     end);
 
     return self;
@@ -276,7 +327,7 @@ function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundId: st
 end
 
 -- Destroys the button.
-function Button:Destroy(): Button
+function Button:Destroy()
     -- Destroy connections
     for _, connection in ipairs(self.Connections) do
         connection:Disconnect();
