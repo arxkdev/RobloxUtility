@@ -6,8 +6,17 @@ local Signal = require(script.Signal);
 local Button = {};
 Button.__index = Button;
 
+-- Types
+type Animation = {
+    Name: string,
+    OnHoverBegin: (btn: typeof(Button.new), props: { any }) -> ()?,
+    OnHoverEnded: (btn: typeof(Button.new), props: { any }) -> ()?,
+    OnHoldBegin: (btn: typeof(Button.new), props: { any }) -> ()?,
+    OnHoldEnded: (btn: typeof(Button.new), props: { any }) -> ()?,
+};
+
 -- Constants
-local ANIMATIONS = {
+local ANIMATIONS: Animation = {
     {
         Name = "DOWN_SCALE",
         OnHoldBegin = function(btn, props)
@@ -80,7 +89,7 @@ local ANIMATIONS = {
 };
 
 -- Helper Functions
-function GetAnimation(typeOfAnimation: string)
+function GetAnimation(typeOfAnimation: string): Animation | nil
     for _, animation in ANIMATIONS do
         if (animation.Name == typeOfAnimation) then
             return animation;
@@ -95,7 +104,7 @@ local SoundGroup = Instance.new("SoundGroup");
 SoundGroup.Name = "Button_SoundGroup";
 SoundGroup.Parent = SoundService;
 
-function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: () -> ())
+function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: () -> ()): typeof(Button)
     local self = setmetatable({}, Button);
 
     -- Hookup signals
@@ -138,7 +147,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
 end
 
 -- Plays a sound based on the type of animatio being played.
-function Button:PlaySound(typeOfAnimation: string)
+function Button:PlaySound(typeOfAnimation: string): typeof(Button.new)
     if (self.Sound.SoundInstance == nil) then
         return;
     end;
@@ -152,7 +161,7 @@ function Button:PlaySound(typeOfAnimation: string)
 end
 
 -- Adds a hover animation of the animations available.
-function Button:AddHoverAnimation(typeOfAnimation: string)
+function Button:AddHoverAnimation(typeOfAnimation: string): typeof(Button.new)
     local animation = GetAnimation(typeOfAnimation);
 
     self.HoverBegin:Connect(function()
@@ -166,7 +175,7 @@ function Button:AddHoverAnimation(typeOfAnimation: string)
 end
 
 -- Adds a hold animation of the animations available.
-function Button:AddHoldAnimation(typeOfAnimation: string)
+function Button:AddHoldAnimation(typeOfAnimation: string): typeof(Button.new)
     local animation = GetAnimation(typeOfAnimation);
 
     self.HoldBegin:Connect(function()
@@ -180,14 +189,14 @@ function Button:AddHoldAnimation(typeOfAnimation: string)
 end
 
 -- Adds a click delay between clicking.
-function Button:AddClickDelay(typeOfAnimation: string)
+function Button:AddClickDelay(typeOfAnimation: string): typeof(Button.new)
     -- Add a delay to the click event.
 
     return self;
 end
 
 -- Sets a sound to a button (if it already exists, will use that one.)
-function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundId: string)
+function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundId: string): typeof(Button.new)
     if (SoundGroup:FindFirstChild(uniqueName)) then
         self.Sound = {
             AnimationType = typeOfAnimation,
@@ -209,7 +218,7 @@ function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundId: st
 end
 
 -- Destroys the button.
-function Button:Destroy()
+function Button:Destroy(): typeof(Button.new)
     -- Destroy connections
     for _, connection in ipairs(self.Connections) do
         connection:Disconnect();
