@@ -16,7 +16,8 @@ for _, v in MainUI.Buttons:GetChildren() do
         print("Image button clicked!");
     end)
         :AddHoverAnimation("ROTATE")
-        :AddHoverAnimation("UI_SCALE")
+        :AddHoverAnimation("UP_SCALE")
         :AddHoldAnimation("DOWN_SCALE")
+        :AddClickAnimation("RIPPLE")
         :SetSound("UI_CLICK", "Click", "rbxassetid://6042053626");
 end;
