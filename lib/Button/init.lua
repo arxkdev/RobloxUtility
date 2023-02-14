@@ -196,7 +196,7 @@ local SoundGroup = Instance.new("SoundGroup");
 SoundGroup.Name = "Button_SoundGroup";
 SoundGroup.Parent = SoundService;
 
-function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: () -> ()): typeof(Button)
+function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: () -> ()?): typeof(Button)
     local self = setmetatable({}, Button);
 
     -- Hookup signals
@@ -211,10 +211,9 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
         SoundInstance = nil
     };
     self.Instance = buttonObject;
-    -- self.Instance:SetAttribute("OriginalColor", if self.Instance:IsA("ImageButton") then self.Instance.ImageColor3 else self.Instance.BackgroundColor3);
 
     -- Hookup the callback to the button's (activated) event.
-    table.insert(self.Connections, buttonObject.Activated:Connect(activatedCallback));
+    if (activatedCallback) then self.Click:Connect(activatedCallback); end;
 
     -- Hookup signals to events
     table.insert(self.Connections, buttonObject.MouseEnter:Connect(function()
