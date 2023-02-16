@@ -162,6 +162,9 @@ local ANIMATIONS: Animation = {
         end,
         AnimationStop = function(btn, cachedArguments)
             local instance = btn.Instance;
+            if (not cachedArguments) then
+                return;
+            end;
             local originalColor = cachedArguments[1];
 
             local properties;
@@ -178,6 +181,15 @@ local ANIMATIONS: Animation = {
             TweenService:Create(instance, TweenInfo.new(0.25, Enum.EasingStyle.Quint), properties):Play();
         end,
     },
+    {
+        Name = "SPLASH_PARTICLE",
+        AnimationStart = function(btn, props)
+        
+        end,
+        AnimationStop = function(btn)
+            
+        end
+    }
 };
 
 -- Helper Functions
@@ -240,7 +252,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
     return self;
 end
 
--- Plays a sound based on the type of animatio being played.
+-- Plays a sound based on the type of animation being played.
 function Button:PlaySound(typeOfAnimation: string): Button
     if (self.Sound.SoundInstance == nil) then
         return;

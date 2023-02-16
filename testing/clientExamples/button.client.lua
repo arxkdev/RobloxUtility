@@ -5,12 +5,12 @@ local PlayerGui = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui
 local MainUI = PlayerGui:WaitForChild("MainUI");
 
 -- Register our image button
-for _, v in MainUI.Buttons:GetChildren() do
-    if (not v:IsA("GuiObject")) then
+for _, Object in MainUI.Buttons:GetChildren() do
+    if (not Object:IsA("GuiObject")) then
         continue;
     end;
 
-    local btn = v:FindFirstChildOfClass("ImageButton") or v:FindFirstChildOfClass("TextButton");
+    local btn = Object:FindFirstChildOfClass("ImageButton") or Object:FindFirstChildOfClass("TextButton");
 
     Button.new(btn, function()
         -- Completely optional callback
