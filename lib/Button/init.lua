@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local SoundService = game:GetService("SoundService");
 local TweenService = game:GetService("TweenService");
 local Signal = require(script.Signal);
+local Spr = require(script.Spr);
 
 local Button = {};
 Button.__index = Button;
@@ -184,11 +185,69 @@ local ANIMATIONS: Animation = {
     {
         Name = "SPLASH_PARTICLE",
         AnimationStart = function(btn, props)
-        
+            
         end,
         AnimationStop = function(btn)
             
         end
+    },
+    {
+        Name = "UP_SPRING",
+        AnimationStart = function(btn, props)
+            local instance = btn.Instance;
+            local uiScale = instance:FindFirstChildOfClass("UIScale");
+
+            if (not uiScale) then
+                uiScale = Instance.new("UIScale");
+                uiScale.Parent = instance;
+            end;
+
+            Spr.target(uiScale, 0.3, 4, {
+                Scale = if props then props.scale else 1.1;
+            });
+        end,
+        AnimationStop = function(btn, props)
+            local instance = btn.Instance;
+            local uiScale = instance:FindFirstChildOfClass("UIScale");
+
+            if (not uiScale) then
+                return;
+            end;
+
+            Spr.stop(uiScale);
+            Spr.target(uiScale, 0.3, 4, {
+                Scale = if props then props.scale else 1;
+            });
+        end,
+    },
+    {
+        Name = "DOWN_SPRING",
+        AnimationStart = function(btn, props)
+            local instance = btn.Instance;
+            local uiScale = instance:FindFirstChildOfClass("UIScale");
+
+            if (not uiScale) then
+                uiScale = Instance.new("UIScale");
+                uiScale.Parent = instance;
+            end;
+
+            Spr.target(uiScale, 0.3, 4, {
+                Scale = if props then props.scale else 0.9;
+            });
+        end,
+        AnimationStop = function(btn, props)
+            local instance = btn.Instance;
+            local uiScale = instance:FindFirstChildOfClass("UIScale");
+
+            if (not uiScale) then
+                return;
+            end;
+
+            Spr.stop(uiScale);
+            Spr.target(uiScale, 0.3, 4, {
+                Scale = if props then props.scale else 1;
+            });
+        end,
     }
 };
 
