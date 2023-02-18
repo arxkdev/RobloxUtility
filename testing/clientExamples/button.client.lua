@@ -33,6 +33,16 @@ for _, Object in MainUI.Buttons:GetChildren() do
         -- :AddHoldAnimation("DOWN_SCALE")
         :AddHoldAnimation("DOWN_SPRING")
         :AddClickAnimation("RIPPLE")
+        :AddHoverAnimation("TEXT", {
+            frameProperties = {
+                BackgroundTransparency = 0;
+                BackgroundColor3 = Color3.fromRGB(0, 0, 0);
+            };
+            textProperties = {
+                Text = "Edit this text!";
+                Font = Enum.Font.SourceSansBold;
+            };
+        })
         :SetSound("UI_CLICK", "Click", clickSoundSettings)
         :SetSound("UI_HOVER", "HoverBegin", hoverSoundSettings);
 

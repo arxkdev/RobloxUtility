@@ -1,6 +1,8 @@
 -- Imports
-local Players = game:GetService("Players")
+local Players = game:GetService("Players");
+local RunService = game:GetService("RunService");
 local SoundService = game:GetService("SoundService");
+local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService");
 local Signal = require(script.Signal);
 local Spr = require(script.Spr);
@@ -17,7 +19,6 @@ type Animation = {
     OnHoldBegin: (btn: Button, props: { any }) -> ({any?})?,
     OnHoldEnded: (btn: Button, cachedArguments: {any?}) -> ()?,
 };
-
 -- Constants
 local PLAYER = Players.LocalPlayer;
 local ANIMATIONS: Animation = {
@@ -206,7 +207,7 @@ local ANIMATIONS: Animation = {
                 Scale = if props then props.scale else 1.1;
             });
         end,
-        AnimationStop = function(btn, props)
+        AnimationStop = function(btn)
             local instance = btn.Instance;
             local uiScale = instance:FindFirstChildOfClass("UIScale");
 
@@ -216,7 +217,7 @@ local ANIMATIONS: Animation = {
 
             Spr.stop(uiScale);
             Spr.target(uiScale, 0.3, 4, {
-                Scale = if props then props.scale else 1;
+                Scale = 1
             });
         end,
     },
@@ -235,7 +236,7 @@ local ANIMATIONS: Animation = {
                 Scale = if props then props.scale else 0.9;
             });
         end,
-        AnimationStop = function(btn, props)
+        AnimationStop = function(btn)
             local instance = btn.Instance;
             local uiScale = instance:FindFirstChildOfClass("UIScale");
 
@@ -245,8 +246,105 @@ local ANIMATIONS: Animation = {
 
             Spr.stop(uiScale);
             Spr.target(uiScale, 0.3, 4, {
-                Scale = if props then props.scale else 1;
+                Scale = 1;
             });
+        end,
+    },
+    {
+        Name = "TEXT",
+        AnimationStart = function(btn, props)
+            local instance = btn.Instance;
+            local connection
+
+            -- Destroy any existing text label(s)
+            for _, OBJECT in pairs(instance:GetChildren()) do
+                if (OBJECT.Name == "BUTTON_CREATED_TEXT_LABEL_FRAME") then
+                    OBJECT:Destroy();
+                end;
+            end;
+
+            local frameProperties = props.frameProperties;
+            local textProperties = props.textProperties;
+
+            -- Create our frame and text with appropriate properties
+            local frame = Instance.new("Frame");
+            frame.Name = "BUTTON_CREATED_TEXT_LABEL_FRAME";
+            frame.BackgroundTransparency = 1;
+            frame.Size = UDim2.new(1, 0, 0.3, 0);
+            frame.BackgroundColor3 = Color3.new(0, 0, 0);
+            frame.ZIndex = 5;
+            for i, v in pairs(frameProperties) do
+                frame[i] = v;
+            end;
+            frame.Parent = instance;
+
+            local text = Instance.new("TextLabel");
+            text.Name = "BUTTON_CREATED_TEXT_LABEL";
+            text.BackgroundTransparency = 1;
+            text.Text = "Set the text..";
+            text.TextColor3 = Color3.new(1, 1, 1);
+            text.ZIndex = 6;
+            text.AnchorPoint = Vector2.new(0.5, 0.5);
+            text.Position = UDim2.new(0.5, 0, 0.5, 0);
+            text.Size = UDim2.new(0.85, 0, 1, 0);
+            text.Font = Enum.Font.SourceSans;
+            text.TextScaled = true;
+            for i, v in pairs(textProperties) do
+                text[i] = v;
+            end;
+            text.Parent = frame;
+
+            local textSize = TextService:GetTextSize(text.Text, text.TextSize, text.Font, Vector2.new(math.huge, math.huge));
+            local textX = textSize.X * 2.5;
+            local textY = textSize.Y * 2.5;
+            frame.Size = UDim2.fromOffset(textX, textY);
+
+            local uiCorner = Instance.new("UICorner");
+            uiCorner.CornerRadius = UDim.new(0, 8);
+            uiCorner.Parent = frame;
+
+            local OFFSET_X = 0;
+            local OFFSET_Y = -20;
+
+            -- Setup connection to update the position of the frame.
+            connection = RunService.RenderStepped:Connect(function()
+                local Mouse = PLAYER:GetMouse();
+
+                if (not instance:IsDescendantOf(game)) then
+                    connection:Disconnect();
+                    return;
+                end;
+
+                if (not instance or not instance.Parent) then
+                    connection:Disconnect();
+                    return;
+                end;
+
+                frame.Position = UDim2.new(0, (Mouse.X - instance.AbsolutePosition.X) + OFFSET_X, 0, (Mouse.Y - instance.AbsolutePosition.Y) + OFFSET_Y);
+            end);
+
+            return {connection};
+        end,
+        AnimationStop = function(btn, cachedArguments)
+            local instance = btn.Instance;
+
+            if (not cachedArguments) then
+                return;
+            end;
+
+            -- Disconnect the connection.
+            local connection = cachedArguments[1];
+
+            if (connection) then
+                connection:Disconnect();
+            end;
+
+            -- Destroy the frame(s)
+            for _, OBJECT in pairs(instance:GetChildren()) do
+                if (OBJECT.Name == "BUTTON_CREATED_TEXT_LABEL_FRAME") then
+                    OBJECT:Destroy();
+                end;
+            end;
         end,
     }
 };
@@ -323,7 +421,7 @@ function Button:ValidateSound(typeOfAnimation: string): Button
 end
 
 -- Adds a hover animation of the animations available.
-function Button:AddHoverAnimation(typeOfAnimation: string): Button
+function Button:AddHoverAnimation(typeOfAnimation: string, properties: table): Button
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -335,7 +433,7 @@ function Button:AddHoverAnimation(typeOfAnimation: string): Button
     -- Save the arguments for the animation so we can use it later.
     local cachedArguments: any;
     self.HoverBegin:Connect(function()
-        cachedArguments = animation.AnimationStart(self);
+        cachedArguments = animation.AnimationStart(self, properties);
     end);
     self.HoverEnded:Connect(function()
         animation.AnimationStop(self, cachedArguments);
@@ -345,7 +443,7 @@ function Button:AddHoverAnimation(typeOfAnimation: string): Button
 end
 
 -- Adds a hold animation of the animations available.
-function Button:AddHoldAnimation(typeOfAnimation: string): Button
+function Button:AddHoldAnimation(typeOfAnimation: string, properties: table): Button
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -356,7 +454,7 @@ function Button:AddHoldAnimation(typeOfAnimation: string): Button
 
     local cachedArguments: any;
     self.HoldBegin:Connect(function()
-        cachedArguments = animation.AnimationStart(self);
+        cachedArguments = animation.AnimationStart(self, properties);
     end);
     self.HoldEnded:Connect(function()
         animation.AnimationStop(self, cachedArguments);
@@ -366,7 +464,7 @@ function Button:AddHoldAnimation(typeOfAnimation: string): Button
 end
 
 -- Adds a click animation of the animations available.
-function Button:AddClickAnimation(typeOfAnimation: string): Button
+function Button:AddClickAnimation(typeOfAnimation: string, properties: table): Button
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -376,7 +474,7 @@ function Button:AddClickAnimation(typeOfAnimation: string): Button
     end;
 
     self.Click:Connect(function()
-        animation.AnimationStart(self);
+        animation.AnimationStart(self, properties);
     end);
 
     return self;
