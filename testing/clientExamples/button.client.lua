@@ -11,7 +11,17 @@ for _, Object in MainUI.Buttons:GetChildren() do
     end;
 
     local btn = Object:FindFirstChildOfClass("ImageButton") or Object:FindFirstChildOfClass("TextButton");
-
+    local clickSoundSettings = {
+        SoundId = 6042053626;
+        Volume = 0.2;
+        Pitch = 1;
+    };
+    local hoverSoundSettings = {
+        SoundId = 718616853;
+        Volume = 0.2;
+        Pitch = 1.1;
+    }
+    
     Button.new(btn, function()
         -- Completely optional callback
         print("Image button clicked!");
@@ -23,7 +33,8 @@ for _, Object in MainUI.Buttons:GetChildren() do
         -- :AddHoldAnimation("DOWN_SCALE")
         :AddHoldAnimation("DOWN_SPRING")
         :AddClickAnimation("RIPPLE")
-        :SetSound("UI_CLICK", "Click", "rbxassetid://6042053626");
+        :SetSound("UI_CLICK", "Click", clickSoundSettings)
+        :SetSound("UI_HOVER", "HoverBegin", hoverSoundSettings);
 
     -- That button will now have:
     -- 1. A ripple animation when clicked

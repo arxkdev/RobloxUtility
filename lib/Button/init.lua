@@ -277,9 +277,9 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
     self.HoldBegin = Signal.new();
     self.HoldEnded = Signal.new();
     self.Click = Signal.new();
-    self.Sound = {
-        AnimationType = "",
-        SoundInstance = nil
+    self.Sounds = {
+        -- AnimationType = "",
+        -- SoundInstance = nil
     };
     self.Instance = buttonObject;
 
@@ -288,23 +288,23 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
 
     -- Hookup signals to events
     table.insert(self.Connections, buttonObject.MouseEnter:Connect(function()
-        task.spawn(self.PlaySound, self, "HoverBegin");
+        task.spawn(self.ValidateSound, self, "HoverBegin");
         self.HoverBegin:Fire();
     end));
     table.insert(self.Connections, buttonObject.MouseLeave:Connect(function()
-        task.spawn(self.PlaySound, self, "HoverEnded");
+        task.spawn(self.ValidateSound, self, "HoverEnded");
         self.HoverEnded:Fire();
     end));
     table.insert(self.Connections, buttonObject.MouseButton1Down:Connect(function()
-        task.spawn(self.PlaySound, self, "HoldBegin");
+        task.spawn(self.ValidateSound, self, "HoldBegin");
         self.HoldBegin:Fire();
     end));
     table.insert(self.Connections, buttonObject.MouseButton1Up:Connect(function()
-        task.spawn(self.PlaySound, self, "HoldEnded");
+        task.spawn(self.ValidateSound, self, "HoldEnded");
         self.HoldEnded:Fire();
     end));
     table.insert(self.Connections, buttonObject.MouseButton1Click:Connect(function()
-        task.spawn(self.PlaySound, self, "Click");
+        task.spawn(self.ValidateSound, self, "Click");
         self.Click:Fire();
     end));
     
@@ -312,17 +312,17 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
 end
 
 -- Plays a sound based on the type of animation being played.
-function Button:PlaySound(typeOfAnimation: string): Button
-    if (self.Sound.SoundInstance == nil) then
+function Button:ValidateSound(typeOfAnimation: string): Button
+    if (#self.Sounds == 0) then
         return;
     end;
 
-    if (self.Sound.AnimationType ~= typeOfAnimation) then
-        return;
+    for _, sound in self.Sounds do
+        if (sound.AnimationType == typeOfAnimation) then
+            sound.SoundInstance:Play();
+            return;
+        end;
     end;
-
-    local sound = self.Sound.SoundInstance;
-    sound:Play();
 end
 
 -- Adds a hover animation of the animations available.
@@ -375,24 +375,33 @@ function Button:AddClickDelay(typeOfAnimation: string): Button
 end
 
 -- Sets a sound to a button (if it already exists, will use that one.)
-function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundId: string): Button
+function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: table): Button
     if (SoundGroup:FindFirstChild(uniqueName)) then
-        self.Sound = {
-            AnimationType = typeOfAnimation,
-            SoundInstance = SoundGroup:FindFirstChild(uniqueName)
-        };
+        table.insert(self.Sounds,{AnimationType = typeOfAnimation, SoundInstance = SoundGroup:FindFirstChild(uniqueName)});
         return self;
     end;
 
     local Sound = Instance.new("Sound");
-    Sound.SoundId = soundId;
     Sound.Name = uniqueName;
+
+    -- Parse the sound id to format it correctly.
+    if (soundSettings.SoundId) then
+        soundSettings.SoundId = "rbxassetid://" .. soundSettings.SoundId;
+    end;
+
+    -- Set the sound settings.
+    for setting, value in pairs(soundSettings) do
+        if (not Sound[setting]) then
+            error("Invalid sound setting: " .. setting);
+            return;
+        end;
+
+        Sound[setting] = value;
+    end;
+
     Sound.Parent = SoundGroup;
 
-    self.Sound = {
-        AnimationType = typeOfAnimation,
-        SoundInstance = Sound
-    };
+    table.insert(self.Sounds, {AnimationType = typeOfAnimation, SoundInstance = Sound});
     return self;
 end
 
