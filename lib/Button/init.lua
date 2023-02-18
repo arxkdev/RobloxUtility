@@ -11,13 +11,19 @@ local Button = {};
 Button.__index = Button;
 
 -- Types
-type Button = typeof(Button.new(nil, nil));
+type CachedArguments = {
+    [string]: any,
+};
 type Animation = {
-    Name: string,
-    OnHoverBegin: (btn: Button, props: { any }) -> ({any?})?,
-    OnHoverEnded: (btn: Button, cachedArguments: {any?}) -> ()?,
-    OnHoldBegin: (btn: Button, props: { any }) -> ({any?})?,
-    OnHoldEnded: (btn: Button, cachedArguments: {any?}) -> ()?,
+    {
+        Name: string,
+        AnimationStart: (typeof(Button.new), { [string]: any }) -> nil | CachedArguments,
+        AnimationStop: (typeof(Button.new), CachedArguments) -> nil,
+    }
+};
+type SoundSettings = {
+    SoundId: number | string,
+    [any]: any,
 };
 -- Constants
 local PLAYER = Players.LocalPlayer;
@@ -36,7 +42,7 @@ local ANIMATIONS: Animation = {
                 Scale = if props then props.scale else 0.9;
             }):Play();
         end,
-        AnimationStop = function(btn, props)
+        AnimationStop = function(btn)
             local instance = btn.Instance;
             local uiScale = instance:FindFirstChildOfClass("UIScale");
             if (not uiScale) then
@@ -44,7 +50,7 @@ local ANIMATIONS: Animation = {
             end;
 
             TweenService:Create(uiScale, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
-                Scale = if props then props.scale else 1;
+                Scale =  1;
             }):Play();
         end,
     },
@@ -62,7 +68,7 @@ local ANIMATIONS: Animation = {
                 Scale = if props then props.scale else 1.1;
             }):Play();
         end,
-        AnimationStop = function(btn, props)
+        AnimationStop = function(btn)
             local instance = btn.Instance;
             local uiScale = instance:FindFirstChildOfClass("UIScale");
             if (not uiScale) then
@@ -70,7 +76,7 @@ local ANIMATIONS: Animation = {
             end;
 
             TweenService:Create(uiScale, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
-                Scale = if props then props.scale else 1;
+                Scale = 1;
             }):Play();
         end,
     },
@@ -83,11 +89,11 @@ local ANIMATIONS: Animation = {
                 Rotation = if props then props.rotation else 5;
             }):Play();
         end,
-        AnimationStop = function(btn, props)
+        AnimationStop = function(btn)
             local instance = btn.Instance;
 
             TweenService:Create(instance, TweenInfo.new(0.25, Enum.EasingStyle.Quint), {
-                Rotation = if props then props.rotation else 0;
+                Rotation = 0;
             }):Play();
         end,
     },
@@ -131,6 +137,9 @@ local ANIMATIONS: Animation = {
                 Tween.Completed:Wait();
                 RippleClone:Destroy();
             end;
+        end,
+        AnimationStop = function(btn)
+            -- Nothing
         end,
     },
     {
@@ -407,7 +416,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
 end
 
 -- Plays a sound based on the type of animation being played.
-function Button:ValidateSound(typeOfAnimation: string): Button
+function Button:ValidateSound(typeOfAnimation: string)
     if (#self.Sounds == 0) then
         return;
     end;
@@ -421,7 +430,7 @@ function Button:ValidateSound(typeOfAnimation: string): Button
 end
 
 -- Adds a hover animation of the animations available.
-function Button:AddHoverAnimation(typeOfAnimation: string, properties: table): Button
+function Button:AddHoverAnimation(typeOfAnimation: string, properties: {any}): typeof(Button.new) | nil
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -443,7 +452,7 @@ function Button:AddHoverAnimation(typeOfAnimation: string, properties: table): B
 end
 
 -- Adds a hold animation of the animations available.
-function Button:AddHoldAnimation(typeOfAnimation: string, properties: table): Button
+function Button:AddHoldAnimation(typeOfAnimation: string, properties: {any}): typeof(Button.new) | nil
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -464,7 +473,7 @@ function Button:AddHoldAnimation(typeOfAnimation: string, properties: table): Bu
 end
 
 -- Adds a click animation of the animations available.
-function Button:AddClickAnimation(typeOfAnimation: string, properties: table): Button
+function Button:AddClickAnimation(typeOfAnimation: string, properties: {any}): typeof(Button.new) | nil
     local animation = GetAnimation(typeOfAnimation);
 
     -- Check if there is a valid animation for this type.
@@ -481,14 +490,14 @@ function Button:AddClickAnimation(typeOfAnimation: string, properties: table): B
 end
 
 -- Adds a click delay between clicking.
-function Button:AddClickDelay(typeOfAnimation: string): Button
+function Button:AddClickDelay(typeOfAnimation: string): typeof(Button.new) | nil
     -- Add a delay to the click event.
     -- TODO
     return self;
 end
 
 -- Sets a sound to a button (if it already exists, will use that one.)
-function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: table | number): Button
+function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: SoundSettings): typeof(Button.new) | nil
     if (not uniqueName) then
         error("Invalid unique name for sound.");
         return;
