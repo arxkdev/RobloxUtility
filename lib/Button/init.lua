@@ -277,10 +277,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
     self.HoldBegin = Signal.new();
     self.HoldEnded = Signal.new();
     self.Click = Signal.new();
-    self.Sounds = {
-        -- AnimationType = "",
-        -- SoundInstance = nil
-    };
+    self.Sounds = {};
     self.Instance = buttonObject;
 
     -- Hookup the callback to the button's (activated) event.
@@ -394,6 +391,16 @@ end
 
 -- Sets a sound to a button (if it already exists, will use that one.)
 function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: table | number): Button
+    if (not uniqueName) then
+        error("Invalid unique name for sound.");
+        return;
+    end;
+
+    if (not typeOfAnimation) then
+        error("Invalid type of animation for sound.");
+        return;
+    end;
+
     if (SoundGroup:FindFirstChild(uniqueName)) then
         table.insert(self.Sounds,{AnimationType = typeOfAnimation, SoundInstance = SoundGroup:FindFirstChild(uniqueName)});
         return self;
