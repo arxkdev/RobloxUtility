@@ -393,7 +393,7 @@ function Button:AddClickDelay(typeOfAnimation: string): Button
 end
 
 -- Sets a sound to a button (if it already exists, will use that one.)
-function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: table): Button
+function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettings: table | number): Button
     if (SoundGroup:FindFirstChild(uniqueName)) then
         table.insert(self.Sounds,{AnimationType = typeOfAnimation, SoundInstance = SoundGroup:FindFirstChild(uniqueName)});
         return self;
@@ -403,6 +403,9 @@ function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettin
     Sound.Name = uniqueName;
 
     -- Parse the sound id to format it correctly.
+    if (type(soundSettings) == "number") then
+        soundSettings = {SoundId = soundSettings};
+    end;
     if (soundSettings.SoundId) then
         soundSettings.SoundId = "rbxassetid://" .. soundSettings.SoundId;
     end;
