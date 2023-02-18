@@ -329,6 +329,12 @@ end
 function Button:AddHoverAnimation(typeOfAnimation: string): Button
     local animation = GetAnimation(typeOfAnimation);
 
+    -- Check if there is a valid animation for this type.
+    if (not animation) then
+        error("Invalid animation type: " .. typeOfAnimation);
+        return;
+    end;
+
     -- Save the arguments for the animation so we can use it later.
     local cachedArguments: any;
     self.HoverBegin:Connect(function()
@@ -345,6 +351,12 @@ end
 function Button:AddHoldAnimation(typeOfAnimation: string): Button
     local animation = GetAnimation(typeOfAnimation);
 
+    -- Check if there is a valid animation for this type.
+    if (not animation) then
+        error("Invalid animation type: " .. typeOfAnimation);
+        return;
+    end;
+
     local cachedArguments: any;
     self.HoldBegin:Connect(function()
         cachedArguments = animation.AnimationStart(self);
@@ -359,6 +371,12 @@ end
 -- Adds a click animation of the animations available.
 function Button:AddClickAnimation(typeOfAnimation: string): Button
     local animation = GetAnimation(typeOfAnimation);
+
+    -- Check if there is a valid animation for this type.
+    if (not animation) then
+        error("Invalid animation type: " .. typeOfAnimation);
+        return;
+    end;
 
     self.Click:Connect(function()
         animation.AnimationStart(self);
