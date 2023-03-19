@@ -192,6 +192,33 @@ local ANIMATIONS: Animation = {
             TweenService:Create(instance, TweenInfo.new(0.25, Enum.EasingStyle.Quint), properties):Play();
         end,
     },
+	{
+		Name = "SHIFT_GRADIENT",
+		AnimationStart = function(btn, props)
+			local instance = btn.Instance;
+			
+			for _, gradient in pairs(instance:GetDescendants()) do
+				-- use attributes because not all gradients are meant to be animatable
+				if gradient:IsA("UIGradient") and not gradient:GetAttribute("IgnoreAnimation") then
+					local newOffset = Vector2.new(0, 1) * (gradient:GetAttribute("OffsetMultiple") or 1)
+
+					TweenService:Create(gradient, TweenInfo.new(gradient:GetAttribute("Time") or 0.15, Enum.EasingStyle.Quint), {Offset = newOffset}):Play();
+				end
+			end
+		end,
+		AnimationStop = function(btn)
+			local instance = btn.Instance;
+			
+			for _, gradient in pairs(instance:GetDescendants()) do
+				-- use attributes because not all gradients are meant to be animatable
+				if gradient:IsA("UIGradient") and not gradient:GetAttribute("IgnoreAnimation") then
+					local originalOffset = Vector2.new(0, -0.5) * (gradient:GetAttribute("OffsetMultiple") or 1)
+
+					TweenService:Create(gradient, TweenInfo.new(gradient:GetAttribute("Time") or 0.15, Enum.EasingStyle.Quint), {Offset = originalOffset}):Play();
+				end
+			end
+		end,
+	},
     {
         Name = "SPLASH_PARTICLE",
         AnimationStart = function(btn, props)
