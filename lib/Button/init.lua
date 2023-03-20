@@ -230,35 +230,72 @@ local ANIMATIONS: Animation = {
             });
         end,
     },
-    {
-        Name = "DOWN_SPRING",
-        AnimationStart = function(btn, props)
-            local instance = btn.Instance;
-            local uiScale = instance:FindFirstChildOfClass("UIScale");
+	{
+		Name = "SHIFT_GRADIENT",
+		AnimationStart = function(btn, props)
+			local instance = btn.Instance;
+			
+			for gradient, subProps in pairs(props) do
+				local newOffset = Vector2.new(0, 1) * (subProps.OffsetMultiple or 1);
+				
+				TweenService:Create(gradient, TweenInfo.new(subProps.TweenTime or 0.15, Enum.EasingStyle.Quint), {Offset = newOffset}):Play();
+			end
+			
+			return props
+		end,
+		AnimationStop = function(btn, cachedProps)
+			local instance = btn.Instance;
+			
+			for gradient, subProps in pairs(cachedProps) do
+				local originalOffset = Vector2.new(0, -0.5) * (subProps.OffsetMultiple or 1)
+				
+				TweenService:Create(gradient, TweenInfo.new(subProps.TweenTime or 0.15, Enum.EasingStyle.Quint), {Offset = originalOffset}):Play();
+			end
+		end,
+	},
+	{
+		Name = "SPLASH_PARTICLE",
+		AnimationStart = function(btn, props)
 
-            if (not uiScale) then
-                uiScale = Instance.new("UIScale");
-                uiScale.Parent = instance;
-            end;
+		end,
+		AnimationStop = function(btn)
 
-            Spr.target(uiScale, 0.3, 4, {
-                Scale = if props then props.scale else 0.9;
-            });
-        end,
-        AnimationStop = function(btn)
-            local instance = btn.Instance;
-            local uiScale = instance:FindFirstChildOfClass("UIScale");
+		end
+	},
+   {
+		Name = "DOWN_SPRING",
+		AnimationStart = function(btn, props)
+			local instance = btn.Instance;
+			local uiScale = instance:FindFirstChildOfClass("UIScale");
 
-            if (not uiScale) then
-                return;
-            end;
+			if (not uiScale) then
+				uiScale = Instance.new("UIScale");
+				uiScale.Parent = instance;
+			end;
+			
+			local scaleBefore = uiScale.Scale
+			
+			Spr.target(uiScale, 0.7, 7, {
+				Scale = if props then props.scale else 0.9;
+			});
+			
+			return {scaleBefore}
+		end,
+		AnimationStop = function(btn, cachedArguments)
+			local instance = btn.Instance;
+			local uiScale = instance:FindFirstChildOfClass("UIScale");
+			local scaleBefore = cachedArguments[1]
+			
+			if (not uiScale) then
+				return;
+			end;
 
-            Spr.stop(uiScale);
-            Spr.target(uiScale, 0.3, 4, {
-                Scale = 1;
-            });
-        end,
-    },
+			Spr.stop(uiScale);
+			Spr.target(uiScale, 0.7, 7, {
+				Scale = scaleBefore or 1;
+			});
+		end,
+	},
     {
         Name = "TEXT",
         AnimationStart = function(btn, props)
@@ -407,7 +444,7 @@ function Button.new(buttonObject: TextButton | ImageButton, activatedCallback: (
         task.spawn(self.ValidateSound, self, "HoldEnded");
         self.HoldEnded:Fire();
     end));
-    table.insert(self.Connections, buttonObject.MouseButton1Click:Connect(function()
+    table.insert(self.Connections, buttonObject.Activated:Connect(function()
         task.spawn(self.ValidateSound, self, "Click");
         self.Click:Fire();
     end));
