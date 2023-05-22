@@ -136,7 +136,7 @@ local ANIMATIONS: Animation = {
             if (not instance:IsDescendantOf(workspace)) then
                 local Info = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
                 local Size = UDim2.new(0.04, 40, 0.08, 40);
-                Size = Size + UDim2.new(0, instance.AbsoluteSize.X, 0, instance.AbsoluteSize.Y);
+                -- Size = Size + UDim2.new(0, instance.AbsoluteSize.X, 0, instance.AbsoluteSize.Y);
 
                 local RippleClone = CreateRipple();
                 RippleClone.Parent = EFFECTS_FRAME;
