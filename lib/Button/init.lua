@@ -27,6 +27,24 @@ type SoundSettings = {
 };
 -- Constants
 local PLAYER = Players.LocalPlayer;
+
+-- Create screengui with frmae
+local EFFECTS_SCREEN_GUI = Instance.new("ScreenGui");
+EFFECTS_SCREEN_GUI.Name = "EFFECTS_SCREEN_GUI";
+EFFECTS_SCREEN_GUI.ResetOnSpawn = false;
+EFFECTS_SCREEN_GUI.DisplayOrder = 10;
+EFFECTS_SCREEN_GUI.Parent = PLAYER:WaitForChild("PlayerGui");
+
+local EFFECTS_FRAME = Instance.new("Frame");
+EFFECTS_FRAME.Name = "EFFECTS_FRAME";
+EFFECTS_FRAME.AnchorPoint = Vector2.new(0.5, 0.5);
+EFFECTS_FRAME.BackgroundTransparency = 1;
+EFFECTS_FRAME.Position = UDim2.new(0.5, 0, 0.5, 0);
+EFFECTS_FRAME.Size = UDim2.new(1, 0, 1, 0);
+EFFECTS_FRAME.SizeConstraint = Enum.SizeConstraint.RelativeXY;
+EFFECTS_FRAME.ZIndex = 100000;
+EFFECTS_FRAME.Parent = EFFECTS_SCREEN_GUI;
+
 local ANIMATIONS: Animation = {
     {
         Name = "DOWN_SCALE",
@@ -110,21 +128,21 @@ local ANIMATIONS: Animation = {
                 ImageLabel.BackgroundTransparency = 1;
                 ImageLabel.Size = UDim2.new(0.064, 40, 0.08, 40);
                 ImageLabel.SizeConstraint = Enum.SizeConstraint.RelativeXY;
-                ImageLabel.ZIndex = 210;
+                ImageLabel.ZIndex = 1000001;
                 ImageLabel.Image = "rbxassetid://10570814766";
                 return ImageLabel;
             end;
-		
+
             if (not instance:IsDescendantOf(workspace)) then
                 local Info = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out);
                 local Size = UDim2.new(0.04, 40, 0.08, 40);
                 Size = Size + UDim2.new(0, instance.AbsoluteSize.X, 0, instance.AbsoluteSize.Y);
 
                 local RippleClone = CreateRipple();
-                RippleClone.Parent = instance;
+                RippleClone.Parent = EFFECTS_FRAME;
 
-                local posX = (Position.X - instance.AbsolutePosition.X);
-                local posY = (Position.Y - instance.AbsolutePosition.Y);
+                local posX = (Position.X - EFFECTS_FRAME.AbsolutePosition.X);
+                local posY = (Position.Y - EFFECTS_FRAME.AbsolutePosition.Y);
 
                 RippleClone.Position = UDim2.new(0, posX, 0, posY);
                 RippleClone.Size = UDim2.new(0, 0, 0, 0);
