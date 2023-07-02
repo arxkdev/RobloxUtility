@@ -589,6 +589,7 @@ function Button:SetSound(uniqueName:string, typeOfAnimation: string, soundSettin
         Sound[setting] = value;
     end;
 
+    Sound.SoundGroup = SoundGroup;
     Sound.Parent = SoundGroup;
 
     table.insert(self.Sounds, {AnimationType = typeOfAnimation, SoundInstance = Sound});
