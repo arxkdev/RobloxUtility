@@ -4,8 +4,14 @@ local RunService = game:GetService("RunService");
 local SoundService = game:GetService("SoundService");
 local TextService = game:GetService("TextService")
 local TweenService = game:GetService("TweenService");
+
+-- For testing
 local Signal = require(script.Signal);
 local Spr = require(script.Spr);
+
+-- For publishing
+-- local Signal = require(script.Parent.Signal);
+-- local Spr = require(script.Spr);
 
 local Button = {};
 Button.__index = Button;
