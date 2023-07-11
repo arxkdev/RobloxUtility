@@ -1,0 +1,11 @@
+[package]
+name = "kumarion/button"
+description = "A library for making button effects easy."
+version = "0.0.2"
+license = "MIT"
+authors = ["Kumarion (https://github.com/Kumarion)"]
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[dependencies]
+Signal = "sleitnick/signal@^1"
